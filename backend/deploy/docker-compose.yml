@@ -7,7 +7,7 @@ services:
     image: caddy:2-alpine
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "12380:80"
       - "443:443"
       - "443:443/udp"
     environment:

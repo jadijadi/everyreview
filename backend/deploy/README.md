@@ -1,6 +1,6 @@
 # VPS deployment
 
-Single-host stack for sharing test builds: Caddy → API → Postgres. Needs Docker + Compose on the VPS, ports 80/443 open.
+Single-host stack for sharing test builds: Caddy → API → Postgres. Needs Docker + Compose on the VPS, ports 12380/443 open.
 
 ```bash
 # on the VPS
@@ -19,3 +19,5 @@ Then build the APK against it:
 cd android
 ./gradlew :app:assembleDebug -PAPI_BASE_URL=https://$DOMAIN/v1/
 ```
+
+Without a domain (plain HTTP on the IP), the API is at `http://<vps-ip>:12380/v1/` — build the debug APK with `-PAPI_BASE_URL=http://<vps-ip>:12380/v1/`.
