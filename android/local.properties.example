@@ -1,0 +1,7 @@
+# Copy to local.properties (gitignored) and adjust for your machine.
+sdk.dir=/path/to/Android/sdk
+
+# Optional Gradle project property consumed by app/build.gradle.kts as
+# BuildConfig.API_BASE_URL. From an emulator, 10.0.2.2 reaches the host
+# machine's localhost. Defaults to that if unset.
+# Pass as -PAPI_BASE_URL=... or set here and read via gradle.properties.

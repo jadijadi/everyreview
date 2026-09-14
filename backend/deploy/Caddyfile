@@ -1,0 +1,5 @@
+# DOMAIN comes from .env. With a real hostname Caddy gets a Let's Encrypt cert
+# automatically. If DOMAIN is unset it falls back to ":80" (plain HTTP on the IP).
+{$DOMAIN} {
+	reverse_proxy api:8080
+}

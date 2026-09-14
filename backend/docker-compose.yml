@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: everyreview
+      POSTGRES_PASSWORD: everyreview
+      POSTGRES_DB: everyreview
+    ports:
+      - "55432:5432"
+    volumes:
+      - everyreview-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  everyreview-postgres-data:

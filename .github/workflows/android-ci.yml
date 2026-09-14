@@ -1,0 +1,19 @@
+# CI for android/**. See ADR-0021 (CI/CD) and ADR-0022 (testing strategy).
+# Placeholder — filled in when Android implementation begins.
+name: android-ci
+
+on:
+  pull_request:
+    paths:
+      - "android/**"
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # - ktlint
+      # - unit tests (domain/ViewModel)
+      # - instrumented tests on emulator (golden path: scan -> view -> submit review)
+      # - assemble debug APK
+      - run: echo "android CI not yet implemented"

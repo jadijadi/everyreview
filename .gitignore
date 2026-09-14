@@ -1,0 +1,27 @@
+# Backend
+backend/.env.local
+backend/deploy/.env
+backend/everyreview-api
+
+# Android
+android/.gradle/
+android/.kotlin/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/*.iml
+android/app/*.iml
+android/captures/
+*.keystore
+*.jks
+
+# Terraform
+infrastructure/**/.terraform/
+infrastructure/**/*.tfstate
+infrastructure/**/*.tfstate.backup
+infrastructure/**/*.tfvars
+
+# OS / editors
+.DS_Store
+.vscode/

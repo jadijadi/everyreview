@@ -1,0 +1,21 @@
+# CI for infrastructure/**. See ADR-0018 (Terraform on AWS).
+# Placeholder — filled in when infrastructure implementation begins.
+name: infrastructure-ci
+
+on:
+  pull_request:
+    paths:
+      - "infrastructure/**"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev, staging, prod]
+    steps:
+      - uses: actions/checkout@v4
+      # - terraform fmt -check
+      # - terraform validate
+      # - terraform plan (post as PR comment), scoped to matrix.environment
+      - run: echo "infrastructure CI not yet implemented"

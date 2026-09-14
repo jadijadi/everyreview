@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+        Debug builds only: the MVP backend is plain HTTP (localhost / adb reverse / LAN dev
+        machine), and Android blocks cleartext traffic by default since API 28. Release builds
+        don't merge this file, so they keep the default cleartext-blocked behavior.
+    -->
+    <application android:usesCleartextTraffic="true" />
+</manifest>

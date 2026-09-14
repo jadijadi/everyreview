@@ -1,0 +1,19 @@
+# CI for backend/**. See ADR-0021 (CI/CD) and ADR-0022 (testing strategy).
+# Placeholder — filled in when backend implementation begins.
+name: backend-ci
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # - lint (golangci-lint)
+      # - unit tests (go test ./...)
+      # - integration tests (go test -tags=integration ./..., testcontainers)
+      # - validate OpenAPI contract against handlers
+      - run: echo "backend CI not yet implemented"
