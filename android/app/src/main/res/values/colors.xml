@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_teal">#0F766E</color>
+    <color name="brand_amber">#F59E0B</color>
+    <color name="ic_launcher_background">@color/brand_teal</color>
+</resources>

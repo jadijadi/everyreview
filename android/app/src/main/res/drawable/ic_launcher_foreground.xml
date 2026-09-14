@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- speech bubble -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M35,31 H73 A8,8 0 0 1 81,39 V65 A8,8 0 0 1 73,73 H47 L38,81 V73 H35 A8,8 0 0 1 27,65 V39 A8,8 0 0 1 35,31 Z" />
+    <!-- barcode bars -->
+    <path
+        android:fillColor="@color/brand_teal"
+        android:pathData="M36,44 h2 v20 h-2 z M40,44 h3 v20 h-3 z M45,44 h2 v20 h-2 z M49,44 h4 v20 h-4 z M55,44 h2 v20 h-2 z M59,44 h3 v20 h-3 z M64,44 h2 v20 h-2 z" />
+    <!-- star badge -->
+    <path
+        android:fillColor="@color/brand_amber"
+        android:pathData="M73,31 A8,8 0 1 1 72.99,31 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M73,33.5 L74.35,37.14 L78.23,37.3 L75.19,39.71 L76.23,43.45 L73,41.3 L69.77,43.45 L70.81,39.71 L67.77,37.3 L71.65,37.14 Z" />
+</vector>

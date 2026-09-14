@@ -1,0 +1,8 @@
+- [x] app logo and version
+- [ ] add an about page with the version number in it
+- [ ] user a theme for the app. the android is ugly / simple
+- [ ] if a new product is being added, the user should be able to add the infor about it
+- [ ] if the product exists, we should show info & ask user to confirm that the product is shown correctly, if its wrong, user should be able to submit his claim
+- [ ] there should be a rate limit per user
+- [ ] save product scan GPS too. this can help a lot
+- [ ] some scoring / gamification method for active users

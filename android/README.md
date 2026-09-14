@@ -50,4 +50,10 @@ This is a first, intentionally small implementation to test the core scan → vi
    ```
 4. Run on an emulator with Google Play services (required for ML Kit) or a physical device to exercise the actual scan → view → submit flow — this requires a camera and hasn't been exercised headlessly.
 
+### Versioning
+- `versionName` comes from `APP_VERSION` in `android/gradle.properties` (semver, bump it by hand for a release).
+- `versionCode` is the git commit count (`git rev-list --count HEAD`), so it increases monotonically with every commit.
+- Debug builds get a `-dev.<short sha>` suffix, and `BuildConfig.GIT_SHA` is always available. The Scan screen shows the logo plus `v<versionName> (<versionCode>)` in the top-left corner (`presentation/common/AppBranding.kt`).
+- The launcher icon is an adaptive icon (`res/mipmap-anydpi-v26/`, foreground/monochrome vectors in `res/drawable/`); `res/drawable/ic_logo.xml` is the same artwork for in-app use.
+
 To point at a different backend (e.g. a physical device on the same Wi-Fi, or a deployed dev environment), pass `-PAPI_BASE_URL=http://<host>:8080/v1/` to Gradle.

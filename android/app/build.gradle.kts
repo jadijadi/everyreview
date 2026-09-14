@@ -6,6 +6,21 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
+// Marketing version lives in gradle.properties (APP_VERSION); the build metadata
+// (versionCode, git SHA) is derived from the git checkout so every build is traceable.
+fun git(vararg args: String): String? = runCatching {
+    val process = ProcessBuilder("git", *args)
+        .directory(rootDir)
+        .redirectErrorStream(true)
+        .start()
+    val output = process.inputStream.bufferedReader().readText().trim()
+    if (process.waitFor() == 0 && output.isNotEmpty()) output else null
+}.getOrNull()
+
+val appVersion: String = project.property("APP_VERSION") as String
+val gitCommitCount: Int = git("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 1
+val gitSha: String = git("rev-parse", "--short", "HEAD") ?: "unknown"
+
 android {
     namespace = "app.everyreview"
     compileSdk = 35
@@ -14,8 +29,9 @@ android {
         applicationId = "app.everyreview"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0-mvp"
+        versionCode = gitCommitCount
+        versionName = appVersion
+        buildConfigField("String", "GIT_SHA", "\"$gitSha\"")
 
         val apiBaseUrl = project.findProperty("API_BASE_URL") as String?
             ?: "http://10.0.2.2:8080/v1/"
@@ -23,6 +39,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            versionNameSuffix = "-dev.$gitSha"
+        }
         release {
             isMinifyEnabled = false
         }
