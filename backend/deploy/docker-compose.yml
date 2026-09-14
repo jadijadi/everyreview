@@ -28,6 +28,7 @@ services:
       DATABASE_URL: postgres://everyreview:${POSTGRES_PASSWORD}@postgres:5432/everyreview?sslmode=disable
       MEDIA_DIR: /data/media
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
     volumes:
       - media-data:/data/media
     depends_on:

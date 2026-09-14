@@ -1,3 +1,4 @@
+- [x] create an admin dashboard so with a password I'll be able to see some stats about how many products / reviews we have (`/admin`, `ADMIN_PASSWORD`)
 - [x] app logo and version
 - [ ] add an about page with the version number in it
 - [ ] user a theme for the app. the android is ugly / simple

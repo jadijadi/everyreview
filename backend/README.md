@@ -41,6 +41,7 @@ This is a first, intentionally small implementation for testing the core scan �
 - `GET /v1/products/{barcode}` — looks up a product by barcode; creates a placeholder row if it doesn't exist yet. Returns the product plus an inline-computed rating summary.
 - `POST /v1/products/{productId}/details` — `multipart/form-data` with `name` (required), optional `brand`, `manufacturer`, `description`, `price` (decimal, `,` or `.`), `currency` (ISO 4217) and an optional `image` file (JPEG/PNG/WebP, ≤ 5 MB). Only works while the product is still a placeholder — first writer wins, later attempts get `409`. Returns the updated product.
 - `GET /v1/media/{key}` — serves an uploaded product photo (`image_url` on the product points here).
+- `GET /admin` (+ `/admin/stats.json`) — operator dashboard: product/review counts, last-14-days activity, rating histogram, most-reviewed products, latest reviews/products. Protected by HTTP basic auth with `ADMIN_PASSWORD` (any username); disabled (404) when the variable is unset. Server-rendered from `internal/admin/templates/dashboard.html`, no JS.
 - `GET /v1/products/{productId}/reviews` — newest-first, up to 50 reviews (no cursor pagination yet).
 - `POST /v1/products/{productId}/reviews` — body `{author_name?, body, rating?}`, no auth.
 
@@ -50,6 +51,6 @@ cd backend
 cp .env.example .env.local   # then adjust PORT/DATABASE_URL if needed
 docker compose up -d          # starts Postgres on localhost:55432 (5432 was taken locally)
 for f in migrations/*.up.sql; do docker compose exec -T postgres psql -U everyreview -d everyreview < "$f"; done
-DATABASE_URL="postgres://everyreview:everyreview@localhost:55432/everyreview?sslmode=disable" go run ./cmd/api
+ADMIN_PASSWORD=dev DATABASE_URL="postgres://everyreview:everyreview@localhost:55432/everyreview?sslmode=disable" go run ./cmd/api
 ```
 The API listens on `localhost:8080` by default (override with `PORT`). `go test ./...` runs the unit tests (fake in-memory repositories — no Postgres integration tests yet, see ADR-0022 for the fuller plan to add later).

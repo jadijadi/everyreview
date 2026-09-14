@@ -14,6 +14,8 @@ The schema is applied automatically the first time Postgres starts (empty volume
 
 Redeploy after code changes: `git pull && docker compose up -d --build`. Uploaded product photos live in the `media-data` volume (`MEDIA_DIR=/data/media` inside the `api` container); the API builds their public URLs from the `Host`/`X-Forwarded-Proto` headers the proxy sends (the Caddyfile trusts those from private-range proxies such as Apache on the same host), or from `PUBLIC_BASE_URL` in `.env` if you set it. Check with `curl -s https://$DOMAIN/v1/products/<barcode>` that `image_url` starts with `https://`.
 
+**Admin dashboard:** set `ADMIN_PASSWORD` in `.env` and `docker compose up -d api`, then open `https://$DOMAIN/admin` (any username, that password). `/admin/stats.json` returns the same numbers as JSON. With the password unset the routes answer 404.
+
 Migrations added so far, for an existing deployment (each is idempotent, safe to re-run):
 ```bash
 docker compose exec -T postgres psql -U everyreview -d everyreview < ../migrations/0002_product_details.up.sql

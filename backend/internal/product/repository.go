@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
+	"everyreview/backend/internal/platform/timeseries"
 )
 
 var (
@@ -19,6 +21,9 @@ type Repository interface {
 	// someone else got there first, ErrNotFound if the id is unknown.
 	UpdateDetails(ctx context.Context, id string, d Details) (Product, error)
 	RatingSummary(ctx context.Context, productID string) (RatingSummary, error)
+	// GetByIDs returns the products it finds, keyed by id; unknown ids are simply absent.
+	GetByIDs(ctx context.Context, ids []string) (map[string]Product, error)
+	Stats(ctx context.Context, recentLimit, days int) (Stats, error)
 }
 
 type postgresRepository struct {
@@ -111,4 +116,76 @@ func (r *postgresRepository) RatingSummary(ctx context.Context, productID string
 		summary.AverageRating = &avg.Float64
 	}
 	return summary, nil
+}
+
+func (r *postgresRepository) GetByIDs(ctx context.Context, ids []string) (map[string]Product, error) {
+	result := make(map[string]Product, len(ids))
+	if len(ids) == 0 {
+		return result, nil
+	}
+	query := `SELECT ` + productColumns + ` FROM products WHERE id = ANY($1::uuid[])`
+	rows, err := r.db.QueryContext(ctx, query, ids)
+	if err != nil {
+		return nil, fmt.Errorf("product: get by ids: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		p, err := scanProduct(rows)
+		if err != nil {
+			return nil, fmt.Errorf("product: get by ids: scan: %w", err)
+		}
+		result[p.ID] = p
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("product: get by ids: rows: %w", err)
+	}
+	return result, nil
+}
+
+func (r *postgresRepository) Stats(ctx context.Context, recentLimit, days int) (Stats, error) {
+	var s Stats
+	const totals = `
+		SELECT COUNT(*),
+		       COUNT(*) FILTER (WHERE source = 'placeholder'),
+		       COUNT(*) FILTER (WHERE image_object_key IS NOT NULL),
+		       COUNT(*) FILTER (WHERE created_at >= now() - interval '1 day'),
+		       COUNT(*) FILTER (WHERE created_at >= now() - interval '7 days')
+		FROM products
+	`
+	if err := r.db.QueryRowContext(ctx, totals).Scan(&s.Total, &s.Placeholders, &s.WithPhoto, &s.Last24h, &s.Last7d); err != nil {
+		return Stats{}, fmt.Errorf("product: stats totals: %w", err)
+	}
+
+	recent := `SELECT ` + productColumns + ` FROM products ORDER BY created_at DESC LIMIT $1`
+	rows, err := r.db.QueryContext(ctx, recent, recentLimit)
+	if err != nil {
+		return Stats{}, fmt.Errorf("product: stats recent: %w", err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		p, err := scanProduct(rows)
+		if err != nil {
+			return Stats{}, fmt.Errorf("product: stats recent: scan: %w", err)
+		}
+		s.Recent = append(s.Recent, p)
+	}
+	if err := rows.Err(); err != nil {
+		return Stats{}, fmt.Errorf("product: stats recent: rows: %w", err)
+	}
+
+	const perDay = `
+		SELECT date_trunc('day', created_at)::date, COUNT(*)
+		FROM products
+		WHERE created_at >= date_trunc('day', now()) - make_interval(days => $1 - 1)
+		GROUP BY 1
+	`
+	dayRows, err := r.db.QueryContext(ctx, perDay, days)
+	if err != nil {
+		return Stats{}, fmt.Errorf("product: stats per day: %w", err)
+	}
+	defer dayRows.Close()
+	if s.PerDay, err = timeseries.ScanPerDay(dayRows, days); err != nil {
+		return Stats{}, fmt.Errorf("product: stats per day: %w", err)
+	}
+	return s, nil
 }

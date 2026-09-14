@@ -64,6 +64,20 @@ func (f *fakeRepository) RatingSummary(ctx context.Context, productID string) (R
 	return f.summary, nil
 }
 
+func (f *fakeRepository) GetByIDs(ctx context.Context, ids []string) (map[string]Product, error) {
+	result := map[string]Product{}
+	for _, id := range ids {
+		if p, err := f.GetByID(ctx, id); err == nil {
+			result[id] = p
+		}
+	}
+	return result, nil
+}
+
+func (f *fakeRepository) Stats(ctx context.Context, recentLimit, days int) (Stats, error) {
+	return Stats{Total: len(f.products)}, nil
+}
+
 type fakeMediaStore struct {
 	saved   []string
 	deleted []string

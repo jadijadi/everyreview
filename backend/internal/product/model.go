@@ -1,6 +1,10 @@
 package product
 
-import "time"
+import (
+	"time"
+
+	"everyreview/backend/internal/platform/timeseries"
+)
 
 type Product struct {
 	ID             string
@@ -36,4 +40,15 @@ type Details struct {
 type RatingSummary struct {
 	ReviewCount   int
 	AverageRating *float64
+}
+
+// Stats feeds the admin dashboard; counts are over all products regardless of source.
+type Stats struct {
+	Total        int
+	Placeholders int // scanned but nobody has described them yet
+	WithPhoto    int
+	Last24h      int
+	Last7d       int
+	Recent       []Product             // newest first
+	PerDay       []timeseries.DayCount // oldest first, one entry per day, gaps filled with zero
 }

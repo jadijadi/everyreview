@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"everyreview/backend/internal/admin"
 	"everyreview/backend/internal/media"
 	"everyreview/backend/internal/platform/db"
 	"everyreview/backend/internal/product"
@@ -44,9 +45,18 @@ func main() {
 		log.Fatalf("preparing media dir: %v", err)
 	}
 
-	productHandler := product.NewHandler(product.NewService(product.NewPostgresRepository(conn), mediaStore))
+	productRepo := product.NewPostgresRepository(conn)
+	reviewRepo := review.NewPostgresRepository(conn)
+
+	productHandler := product.NewHandler(product.NewService(productRepo, mediaStore))
+	reviewHandler := review.NewHandler(review.NewService(reviewRepo))
 	mediaHandler := media.NewHandler(mediaStore)
-	reviewHandler := review.NewHandler(review.NewService(review.NewPostgresRepository(conn)))
+
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	if adminPassword == "" {
+		log.Print("ADMIN_PASSWORD not set: /admin dashboard disabled")
+	}
+	adminHandler := admin.NewHandler(admin.NewService(productRepo, reviewRepo), adminPassword)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -57,6 +67,7 @@ func main() {
 		reviewHandler.Routes(v1)
 		mediaHandler.Routes(v1)
 	})
+	adminHandler.Routes(r)
 
 	addr := ":" + port
 	log.Printf("everyreview backend listening on %s", addr)

@@ -16,6 +16,10 @@ func (f *fakeRepository) ListByProduct(ctx context.Context, productID string, li
 	return f.toList, nil
 }
 
+func (f *fakeRepository) Stats(ctx context.Context, recentLimit, topLimit, days int) (Stats, error) {
+	return Stats{Total: len(f.created)}, nil
+}
+
 func (f *fakeRepository) Create(ctx context.Context, r NewReview) (Review, error) {
 	f.created = append(f.created, r)
 	return Review{

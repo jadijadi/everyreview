@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EveryReview admin</title>
+<style>
+  :root { --bg:#f6f7f8; --card:#fff; --ink:#1b1f23; --muted:#6a737d; --line:#e1e4e8; --teal:#0f766e; --amber:#f59e0b; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0f1418; --card:#171d23; --ink:#e6edf3; --muted:#8b949e; --line:#2a323c; } }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:24px 16px 48px; background:var(--bg); color:var(--ink); font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  main { max-width:1080px; margin:0 auto; }
+  header { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+  h1 { margin:0; font-size:20px; } h1 span { color:var(--teal); }
+  h2 { margin:28px 0 10px; font-size:15px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .meta { color:var(--muted); font-size:12px; }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .tile { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .tile .n { font-size:28px; font-weight:600; line-height:1.1; }
+  .tile .l { color:var(--muted); font-size:12px; margin-top:4px; }
+  .tile .s { color:var(--muted); font-size:12px; margin-top:8px; }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; } @media (max-width:760px) { .cols { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; } th,td { text-align:left; padding:6px 8px; border-top:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:500; font-size:12px; border-top:0; } td.num { text-align:right; white-space:nowrap; }
+  .chart { display:grid; grid-template-columns:repeat(14,1fr); gap:6px; align-items:end; height:140px; }
+  .chart .day { display:flex; gap:2px; align-items:end; height:100%; }
+  .chart .bar { flex:1; border-radius:3px 3px 0 0; min-height:2px; } .chart .p { background:var(--teal); } .chart .r { background:var(--amber); }
+  .labels { display:grid; grid-template-columns:repeat(14,1fr); gap:6px; font-size:10px; color:var(--muted); text-align:center; margin-top:4px; }
+  .legend { font-size:12px; color:var(--muted); margin-bottom:8px; } .legend i { display:inline-block; width:10px; height:10px; border-radius:2px; vertical-align:-1px; margin-right:4px; }
+  .hist { display:grid; grid-template-columns:auto 1fr auto; gap:4px 10px; align-items:center; font-size:13px; }
+  .hist .track { background:var(--line); border-radius:3px; height:10px; } .hist .fill { background:var(--amber); height:100%; border-radius:3px; }
+  .empty { color:var(--muted); padding:8px 0; }
+  a { color:var(--teal); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1><span>EveryReview</span> admin</h1>
+    <div class="meta">Generated {{.GeneratedAt.Format "2006-01-02 15:04 UTC"}} · <a href="/admin">refresh</a> · <a href="/admin/stats.json">json</a></div>
+  </header>
+
+  <div class="tiles">
+    <div class="tile"><div class="n">{{.Products.Total}}</div><div class="l">Products</div><div class="s">+{{.Products.Last24h}} today · +{{.Products.Last7d}} this week</div></div>
+    <div class="tile"><div class="n">{{.Reviews.Total}}</div><div class="l">Reviews</div><div class="s">+{{.Reviews.Last24h}} today · +{{.Reviews.Last7d}} this week</div></div>
+    <div class="tile"><div class="n">{{avg .Reviews.AverageRating}}</div><div class="l">Average rating</div><div class="s">across rated reviews</div></div>
+    <div class="tile"><div class="n">{{.Products.Placeholders}}</div><div class="l">Awaiting details</div><div class="s">{{percent .Products.Placeholders .Products.Total}}% of products are still placeholders</div></div>
+    <div class="tile"><div class="n">{{.Products.WithPhoto}}</div><div class="l">With photo</div><div class="s">{{percent .Products.WithPhoto .Products.Total}}% of products</div></div>
+    <div class="tile"><div class="n">{{.Reviews.DistinctAuthor}}</div><div class="l">Reviewer names</div><div class="s">distinct nicknames used</div></div>
+  </div>
+
+  <h2>Last 14 days</h2>
+  <div class="card">
+    <div class="legend"><i style="background:var(--teal)"></i>products scanned &nbsp; <i style="background:var(--amber)"></i>reviews written</div>
+    <div class="chart">
+      {{range .Series}}<div class="day" title="{{.Day.Format "Jan 2"}}: {{.Products}} products, {{.Reviews}} reviews">
+        <div class="bar p" style="height:{{percent .Products $.SeriesMax}}%"></div>
+        <div class="bar r" style="height:{{percent .Reviews $.SeriesMax}}%"></div>
+      </div>{{end}}
+    </div>
+    <div class="labels">{{range .Series}}<div>{{.Day.Format "2"}}</div>{{end}}</div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <h2>Rating distribution</h2>
+      <div class="card">
+        {{if .Reviews.Total}}
+        <div class="hist">
+          {{$r := .Reviews}}
+          <div>★★★★★</div><div class="track"><div class="fill" style="width:{{percent (index $r.RatingCounts 4) $r.Total}}%"></div></div><div>{{index $r.RatingCounts 4}}</div>
+          <div>★★★★☆</div><div class="track"><div class="fill" style="width:{{percent (index $r.RatingCounts 3) $r.Total}}%"></div></div><div>{{index $r.RatingCounts 3}}</div>
+          <div>★★★☆☆</div><div class="track"><div class="fill" style="width:{{percent (index $r.RatingCounts 2) $r.Total}}%"></div></div><div>{{index $r.RatingCounts 2}}</div>
+          <div>★★☆☆☆</div><div class="track"><div class="fill" style="width:{{percent (index $r.RatingCounts 1) $r.Total}}%"></div></div><div>{{index $r.RatingCounts 1}}</div>
+          <div>★☆☆☆☆</div><div class="track"><div class="fill" style="width:{{percent (index $r.RatingCounts 0) $r.Total}}%"></div></div><div>{{index $r.RatingCounts 0}}</div>
+        </div>
+        {{else}}<div class="empty">No reviews yet.</div>{{end}}
+      </div>
+    </div>
+    <div>
+      <h2>Most reviewed products</h2>
+      <div class="card">
+        {{if .TopProducts}}
+        <table><tr><th>Product</th><th>Barcode</th><th class="num">Reviews</th></tr>
+        {{range .TopProducts}}<tr><td>{{.DisplayName}}</td><td class="meta">{{.Barcode}}</td><td class="num">{{.ReviewCount}}</td></tr>{{end}}
+        </table>
+        {{else}}<div class="empty">No reviews yet.</div>{{end}}
+      </div>
+    </div>
+  </div>
+
+  <h2>Latest reviews</h2>
+  <div class="card">
+    {{if .Recent}}
+    <table><tr><th>When</th><th>Product</th><th>Rating</th><th>Author</th><th>Review</th></tr>
+    {{range .Recent}}<tr><td class="meta" style="white-space:nowrap">{{ago .CreatedAt}}</td><td>{{.ProductName}}</td><td style="white-space:nowrap">{{stars .Rating}}</td><td>{{.AuthorName}}</td><td>{{snippet .Body}}</td></tr>{{end}}
+    </table>
+    {{else}}<div class="empty">No reviews yet.</div>{{end}}
+  </div>
+
+  <h2>Latest products</h2>
+  <div class="card">
+    {{if .Products.Recent}}
+    <table><tr><th>When</th><th>Barcode</th><th>Name</th><th>Brand</th><th>Status</th></tr>
+    {{range .Products.Recent}}<tr><td class="meta" style="white-space:nowrap">{{ago .CreatedAt}}</td><td>{{.Barcode}}</td><td>{{if .Name}}{{.Name}}{{else}}<span class="meta">—</span>{{end}}</td><td>{{if .Brand}}{{.Brand}}{{else}}<span class="meta">—</span>{{end}}</td><td>{{if .IsPlaceholder}}<span class="meta">placeholder</span>{{else}}described{{if .ImageObjectKey}} · photo{{end}}{{end}}</td></tr>{{end}}
+    </table>
+    {{else}}<div class="empty">Nothing scanned yet.</div>{{end}}
+  </div>
+</main>
+</body>
+</html>
