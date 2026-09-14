@@ -61,3 +61,15 @@ curl https://reviews.example.com/v1/products/0000000000000
 ```
 
 Then build the APK with `-PAPI_BASE_URL=https://reviews.example.com/v1/` (HTTPS, so release builds work too). Since Apache fronts Caddy, you can also change the compose port mappings to `127.0.0.1:12380:80` so Caddy isn't reachable from outside directly.
+
+### CentOS / RHEL differences
+
+Service is `httpd`, config goes in `/etc/httpd/conf.d/everyreview.conf` (same vhost as above but log paths `/var/log/httpd/...`), mod_proxy is built in, and SELinux/firewalld must allow the proxy:
+
+```bash
+sudo dnf install -y mod_ssl epel-release && sudo dnf install -y certbot python3-certbot-apache
+sudo setsebool -P httpd_can_network_connect 1
+sudo firewall-cmd --permanent --add-service=http --add-service=https && sudo firewall-cmd --reload
+sudo certbot --apache -d reviews.example.com
+sudo apachectl configtest && sudo systemctl reload httpd
+```
