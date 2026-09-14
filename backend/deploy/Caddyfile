@@ -1,5 +1,13 @@
 # DOMAIN comes from .env. With a real hostname Caddy gets a Let's Encrypt cert
 # automatically. If DOMAIN is unset it falls back to ":80" (plain HTTP on the IP).
+{
+	servers {
+		# When Apache fronts Caddy (see README), keep its X-Forwarded-Proto so the API
+		# builds https:// image URLs instead of http:// ones that Apache then redirects.
+		trusted_proxies static private_ranges
+	}
+}
+
 {$DOMAIN} {
 	reverse_proxy api:8080
 }
