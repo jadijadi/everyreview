@@ -8,8 +8,8 @@ services:
     restart: unless-stopped
     ports:
       - "12380:80"
-      - "443:443"
-      - "443:443/udp"
+      - "12443:443"
+      - "12443:443/udp"
     environment:
       DOMAIN: ${DOMAIN:-:80}
     volumes:
