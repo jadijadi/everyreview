@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import app.everyreview.data.local.entity.ProductEntity
 import app.everyreview.data.local.entity.ReviewEntity
 
-@Database(entities = [ProductEntity::class, ReviewEntity::class], version = 1, exportSchema = false)
+@Database(entities = [ProductEntity::class, ReviewEntity::class], version = 2, exportSchema = false)
 abstract class EveryReviewDatabase : RoomDatabase() {
     abstract fun productDao(): ProductDao
 

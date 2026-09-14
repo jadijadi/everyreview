@@ -16,6 +16,10 @@ fun ProductResponse.toDomain(): Product = Product(
     isPlaceholder = isPlaceholder,
     reviewCount = ratingSummary.reviewCount,
     averageRating = ratingSummary.averageRating,
+    manufacturer = manufacturer,
+    description = description,
+    price = price,
+    currency = currency,
 )
 
 fun Product.toEntity(cachedAt: Long = System.currentTimeMillis()): ProductEntity = ProductEntity(
@@ -27,6 +31,10 @@ fun Product.toEntity(cachedAt: Long = System.currentTimeMillis()): ProductEntity
     isPlaceholder = isPlaceholder,
     reviewCount = reviewCount,
     averageRating = averageRating,
+    manufacturer = manufacturer,
+    description = description,
+    price = price,
+    currency = currency,
     cachedAt = cachedAt,
 )
 
@@ -39,6 +47,10 @@ fun ProductEntity.toDomain(): Product = Product(
     isPlaceholder = isPlaceholder,
     reviewCount = reviewCount,
     averageRating = averageRating,
+    manufacturer = manufacturer,
+    description = description,
+    price = price,
+    currency = currency,
 )
 
 fun ReviewResponse.toDomain(): Review = Review(

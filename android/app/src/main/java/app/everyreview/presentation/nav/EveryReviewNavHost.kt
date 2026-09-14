@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import app.everyreview.presentation.addproduct.AddProductScreen
 import app.everyreview.presentation.product.ProductScreen
 import app.everyreview.presentation.review.WriteReviewScreen
 import app.everyreview.presentation.scan.ScanScreen
@@ -14,6 +15,7 @@ import app.everyreview.presentation.scan.ScanScreen
 private const val ROUTE_SCAN = "scan"
 private const val ROUTE_PRODUCT = "product/{barcode}"
 private const val ROUTE_WRITE_REVIEW = "write_review/{productId}"
+private const val ROUTE_ADD_PRODUCT = "add_product/{productId}/{barcode}"
 
 @Composable
 fun EveryReviewNavHost(navController: NavHostController = rememberNavController()) {
@@ -29,6 +31,18 @@ fun EveryReviewNavHost(navController: NavHostController = rememberNavController(
         ) {
             ProductScreen(
                 onWriteReview = { productId -> navController.navigate("write_review/$productId") },
+                onAddDetails = { productId, barcode -> navController.navigate("add_product/$productId/$barcode") },
+            )
+        }
+        composable(
+            ROUTE_ADD_PRODUCT,
+            arguments = listOf(
+                navArgument("productId") { type = NavType.StringType },
+                navArgument("barcode") { type = NavType.StringType },
+            ),
+        ) {
+            AddProductScreen(
+                onSubmitted = { navController.popBackStack() },
             )
         }
         composable(

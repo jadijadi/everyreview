@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"everyreview/backend/internal/media"
 	"everyreview/backend/internal/platform/db"
 	"everyreview/backend/internal/product"
 	"everyreview/backend/internal/review"
@@ -34,7 +35,17 @@ func main() {
 	}
 	defer conn.Close()
 
-	productHandler := product.NewHandler(product.NewService(product.NewPostgresRepository(conn)))
+	mediaDir := os.Getenv("MEDIA_DIR")
+	if mediaDir == "" {
+		mediaDir = "./data/media"
+	}
+	mediaStore, err := media.NewDiskStore(mediaDir)
+	if err != nil {
+		log.Fatalf("preparing media dir: %v", err)
+	}
+
+	productHandler := product.NewHandler(product.NewService(product.NewPostgresRepository(conn), mediaStore))
+	mediaHandler := media.NewHandler(mediaStore)
 	reviewHandler := review.NewHandler(review.NewService(review.NewPostgresRepository(conn)))
 
 	r := chi.NewRouter()
@@ -44,6 +55,7 @@ func main() {
 	r.Route("/v1", func(v1 chi.Router) {
 		productHandler.Routes(v1)
 		reviewHandler.Routes(v1)
+		mediaHandler.Routes(v1)
 	})
 
 	addr := ":" + port

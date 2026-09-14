@@ -43,14 +43,17 @@ class ProductViewModel @Inject constructor(
         }
     }
 
-    /** Re-fetches only the review list, keeping the loaded product visible (used after popping back from Write Review). */
-    fun refreshReviews() {
+    /**
+     * Re-fetches product and reviews while keeping the current content on screen (used after
+     * popping back from Write Review / Add Details). Failures keep whatever was shown before.
+     */
+    fun refreshQuietly() {
         val current = _uiState.value
         if (current !is ProductUiState.Success) return
         viewModelScope.launch {
-            getReviews(current.product.id).onSuccess { reviews ->
-                _uiState.value = current.copy(reviews = reviews)
-            }
+            val product = getProduct(barcode).getOrDefault(current.product)
+            val reviews = getReviews(product.id).getOrDefault(current.reviews)
+            _uiState.value = ProductUiState.Success(product, reviews)
         }
     }
 }

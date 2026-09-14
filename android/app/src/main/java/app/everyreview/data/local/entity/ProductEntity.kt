@@ -13,5 +13,9 @@ data class ProductEntity(
     val isPlaceholder: Boolean,
     val reviewCount: Int,
     val averageRating: Double?,
+    val manufacturer: String?,
+    val description: String?,
+    val price: Double?,
+    val currency: String?,
     val cachedAt: Long,
 )

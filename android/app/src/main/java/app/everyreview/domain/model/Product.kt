@@ -9,4 +9,8 @@ data class Product(
     val isPlaceholder: Boolean,
     val reviewCount: Int,
     val averageRating: Double?,
+    val manufacturer: String? = null,
+    val description: String? = null,
+    val price: Double? = null,
+    val currency: String? = null,
 )

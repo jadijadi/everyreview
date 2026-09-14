@@ -19,7 +19,10 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): EveryReviewDatabase =
-        Room.databaseBuilder(context, EveryReviewDatabase::class.java, "everyreview.db").build()
+        Room.databaseBuilder(context, EveryReviewDatabase::class.java, "everyreview.db")
+            // The database is only a network-first cache, so a schema bump may simply drop it.
+            .fallbackToDestructiveMigration()
+            .build()
 
     @Provides
     fun provideProductDao(database: EveryReviewDatabase): ProductDao = database.productDao()

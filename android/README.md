@@ -32,11 +32,12 @@ This is a first, intentionally small implementation to test the core scan → vi
 - **No generated API client.** `data/remote/EveryReviewApi.kt` is hand-written Retrofit against the actual (trimmed) backend endpoints, not generated via `scripts/generate-api-clients.sh` from `backend/api/openapi.yaml` — deferred until the API stabilizes past MVP.
 - **Room cache is intentionally thin.** Two entities (`ProductEntity`, `ReviewEntity`) cache the last-fetched product/reviews as a network-first, cache-as-fallback read path — no sync/invalidation strategy beyond that (ADR-0024 flags this as a later design item).
 - **Moshi codegen (KSP) instead of `openapi-generator`-produced models** — DTOs in `data/remote/dto/` are hand-written and annotated with `@JsonClass(generateAdapter = true)`.
-- Only three screens exist: Scan → Product → Write Review. No instrumented Compose UI tests yet (unit tests for ViewModels/use cases only) — add those once the manual flow is validated on a device/emulator.
+- Only four screens exist: Scan → Product → Write Review / Add Product Details. No instrumented Compose UI tests yet (unit tests for ViewModels/use cases only) — add those once the manual flow is validated on a device/emulator.
 
 ### Screens
 - **Scan** (`presentation/scan/`) — CameraX preview + ML Kit on-device barcode detection (EAN-13/8, UPC-A/E, Code128, QR per [ADR-0025](../adrs/0025-barcode-scanning-library.md)). On first successful decode, navigates to Product.
 - **Product** (`presentation/product/`) — looks up the product by barcode (creating a placeholder server-side if unknown), shows name/brand/rating summary and the review list, refreshing reviews whenever the screen resumes.
+- **Add Product Details** (`presentation/addproduct/`) — offered on Product when the backend returned a placeholder (nobody has described this barcode yet). Name is mandatory; brand, manufacturer, price + currency (prefilled from the device locale), description and a photo (camera via `FileProvider`, or the system photo picker) are optional. `data/media/PhotoPreparer.kt` downscales the photo to ≤1600 px JPEG before it goes into the multipart `POST /v1/products/{id}/details`. First writer wins server-side; a `409` is shown as "someone already added details".
 - **Write Review** (`presentation/review/`) — nickname (remembered), optional 1–5 star rating, review text; submits and pops back to Product.
 
 ### Quick start

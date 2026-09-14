@@ -26,6 +26,9 @@ services:
     environment:
       PORT: "8080"
       DATABASE_URL: postgres://everyreview:${POSTGRES_PASSWORD}@postgres:5432/everyreview?sslmode=disable
+      MEDIA_DIR: /data/media
+    volumes:
+      - media-data:/data/media
     depends_on:
       postgres:
         condition: service_healthy
@@ -39,8 +42,11 @@ services:
       POSTGRES_DB: everyreview
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      # Runs once, on first start with an empty data volume (Postgres image convention).
+      # Run once, in name order, on first start with an empty data volume (Postgres image
+      # convention). Add every new *.up.sql here; existing deployments apply it by hand
+      # (see README).
       - ../migrations/0001_init.up.sql:/docker-entrypoint-initdb.d/0001_init.up.sql:ro
+      - ../migrations/0002_product_details.up.sql:/docker-entrypoint-initdb.d/0002_product_details.up.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U everyreview -d everyreview"]
       interval: 5s
@@ -49,5 +55,6 @@ services:
 
 volumes:
   postgres-data:
+  media-data:
   caddy-data:
   caddy-config:

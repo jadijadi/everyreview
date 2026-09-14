@@ -128,6 +128,58 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProductWithSummary"
 
+  /products/{productId}/details:
+    post:
+      tags: [products]
+      summary: Fill in a placeholder product's details (first writer wins).
+      description: >
+        Multipart so the optional photo travels with the text fields. Only allowed while
+        `is_placeholder` is true; once details exist, corrections go through a separate
+        claim flow (not yet specified).
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ProductDetailsInput"
+      responses:
+        "200":
+          description: Product updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductWithSummary"
+        "400":
+          description: Validation failed (missing name, bad price/currency, unsupported image type).
+        "404":
+          description: Unknown product.
+        "409":
+          description: Details were already submitted for this product.
+        "413":
+          description: Image larger than 5 MB.
+
+  /media/{key}:
+    get:
+      tags: [products]
+      summary: Serve an uploaded product photo. `image_url` on a product points here.
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema: { type: string, example: products/53ca0602a9c16f8456db2fdec2d5c532.png }
+      responses:
+        "200":
+          description: The image bytes (immutable; cache freely).
+          content:
+            image/*: {}
+        "404":
+          description: No such object.
+
   /products/{productId}/reviews:
     get:
       tags: [reviews]
@@ -216,8 +268,27 @@ components:
         barcode: { type: string }
         name: { type: string, nullable: true }
         brand: { type: string, nullable: true }
-        image_url: { type: string, nullable: true, description: CDN URL, not an S3 key. }
+        manufacturer: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        price: { type: number, format: double, nullable: true, description: Two decimal places. }
+        currency: { type: string, nullable: true, description: ISO 4217 code, e.g. EUR. }
+        image_url: { type: string, nullable: true, description: Absolute URL, never a storage key. }
         is_placeholder: { type: boolean }
+
+    ProductDetailsInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, maxLength: 200 }
+        brand: { type: string, maxLength: 120 }
+        manufacturer: { type: string, maxLength: 120 }
+        description: { type: string, maxLength: 2000 }
+        price: { type: string, description: "Decimal, `.` or `,` separator, >= 0.", example: "2,49" }
+        currency: { type: string, minLength: 3, maxLength: 3, description: ISO 4217 code (case-insensitive). }
+        image:
+          type: string
+          format: binary
+          description: JPEG, PNG or WebP, at most 5 MB. Content type is sniffed server-side.
 
     RatingSummary:
       type: object

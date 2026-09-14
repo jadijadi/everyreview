@@ -12,7 +12,12 @@ curl https://$DOMAIN/v1/products/0000000000000   # should return a placeholder p
 
 The schema is applied automatically the first time Postgres starts (empty volume). Later migrations are not applied automatically — run them with `docker compose exec -T postgres psql -U everyreview -d everyreview < ../migrations/<file>`.
 
-Redeploy after code changes: `git pull && docker compose up -d --build`.
+Redeploy after code changes: `git pull && docker compose up -d --build`. Uploaded product photos live in the `media-data` volume (`MEDIA_DIR=/data/media` inside the `api` container); the API builds their public URLs from the `Host`/`X-Forwarded-Proto` headers the proxy sends, or from `PUBLIC_BASE_URL` if you set it.
+
+Migrations added so far, for an existing deployment (each is idempotent, safe to re-run):
+```bash
+docker compose exec -T postgres psql -U everyreview -d everyreview < ../migrations/0002_product_details.up.sql
+```
 
 Then build the APK against it:
 ```bash
